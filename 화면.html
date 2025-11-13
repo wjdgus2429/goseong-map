@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>고성 직업MAP</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad></script>
+<script>
+    const mapContainer = document.getElementById('map');
+    const mapOption = {
+        center: new kakao.maps.LatLng(34.973, 128.322), // 고성군 중심 좌표
+        level: 8
+    };
+
+    const map = new kakao.maps.Map(mapContainer, mapOption);
+
+    // 예: EK중공업 위치 마커
+    const ekMarker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(35.0144, 128.3226),
+        map: map
+    });
+
+    // 예: KAI (사천)
+    const kaiMarker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(35.0763, 128.0845),
+        map: map
+    });
+</script>
+
+</body>
+</html>
