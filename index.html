@@ -20,4 +20,107 @@
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad&autoload=false"></script>
 </head>
 <body>
-  <div id=
+  <div id="map"></div>
+
+  <script>
+    // 1) 우리 기업 데이터: JSON 대신 JS 배열로 직접 선언
+    const companies = [
+      {
+        industry: "aero",
+        industryName: "우주·항공",
+        name: "KAI(한국항공우주산업)",
+        lat: 34.9781625980645,
+        lng: 128.29042206421983
+      },
+      {
+        industry: "ship",
+        industryName: "조선·해양",
+        name: "EK중공업",
+        lat: 35.011319508463835,
+        lng: 128.48268869165898
+      },
+      {
+        industry: "ship",
+        industryName: "조선·해양",
+        name: "SK오션플랜트",
+        lat: 35.05193447409189,
+        lng: 128.47723012735116
+      },
+      {
+        industry: "ship",
+        industryName: "조선·해양",
+        name: "삼강S&C",
+        lat: 34.99369305057122,
+        lng: 128.46167095183077
+      },
+      {
+        industry: "craft",
+        industryName: "공예·공방",
+        name: "엄마손공방",
+        lat: 34.97596206764501,
+        lng: 128.31615596063517
+      },
+      {
+        industry: "tradition",
+        industryName: "전통·예술",
+        name: "고성오광대보존회",
+        lat: 34.973605070659815,
+        lng: 128.33412518499514
+      },
+      {
+        industry: "agri",
+        industryName: "6차산업",
+        name: "정동목장교육농장",
+        lat: 35.122873160327366,
+        lng: 128.26343036412558
+      }
+    ];
+
+    window.onload = function () {
+      kakao.maps.load(function () {
+        // 2) URL 파라미터에서 industry 값 읽기
+        const urlParams = new URLSearchParams(window.location.search);
+        const industry = urlParams.get("industry"); // ship, aero, craft...
+
+        // 3) 지도 생성
+        const mapContainer = document.getElementById("map");
+        const mapOption = {
+          center: new kakao.maps.LatLng(34.99, 128.35), // 고성 근처 중심
+          level: 10
+        };
+        const map = new kakao.maps.Map(mapContainer, mapOption);
+
+        // 4) 산업 필터링 (파라미터 없으면 전체)
+        const filtered = industry
+          ? companies.filter(c => c.industry === industry)
+          : companies;
+
+        console.log("industry =", industry, "markers =", filtered.length);
+
+        // 5) 마커 찍기
+        filtered.forEach(company => {
+          const position = new kakao.maps.LatLng(company.lat, company.lng);
+
+          const marker = new kakao.maps.Marker({
+            position,
+            map
+          });
+
+          const infowindow = new kakao.maps.InfoWindow({
+            content: `
+              <div style="padding:5px 10px; font-size:14px;">
+                <b>${company.name}</b><br/>
+                ${company.industryName}
+              </div>
+            `
+          });
+
+          kakao.maps.event.addListener(marker, "click", function () {
+            infowindow.open(map, marker);
+          });
+        });
+      });
+    };
+  </script>
+</body>
+</html>
