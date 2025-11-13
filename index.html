@@ -458,7 +458,7 @@
       }
 
       const imgSrc = company.imageUrl && company.imageUrl.trim()
-        ? company.imageUrl
+        ? encodeURI(company.imageUrl)
         : "https://via.placeholder.com/70x60?text=No+Image";
 
       const mainWorkText = company.mainWork || "";
@@ -590,3 +590,4 @@
   </script>
 </body>
 </html>
+
