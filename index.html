@@ -14,28 +14,39 @@
       width: 100%;
       height: 100vh;
     }
-    /* 검색창 스타일 */
-    #search-box {
+
+    /* 상단 검색/필터 영역 전체 */
+    #ui-wrapper {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: sans-serif;
+      font-size: 14px;
+      min-width: 320px;
+      max-width: 520px;
+    }
+
+    /* 검색 박스 */
+    #search-box {
+      background: rgba(255, 255, 255, 0.95);
       padding: 8px 12px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       display: flex;
       gap: 6px;
       align-items: center;
-      font-family: sans-serif;
-      font-size: 14px;
     }
     #search-input {
       border: 1px solid #ccc;
       border-radius: 4px;
       padding: 4px 8px;
       min-width: 220px;
+      flex: 1;
     }
     #search-button {
       border: none;
@@ -44,9 +55,36 @@
       background: #4a90e2;
       color: white;
       cursor: pointer;
+      white-space: nowrap;
     }
     #search-button:hover {
       background: #3577c5;
+    }
+
+    /* 산업 필터 버튼들 */
+    #industry-filter {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 6px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .industry-btn {
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      padding: 4px 10px;
+      background: #f7f7f7;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .industry-btn.active {
+      background: #4a90e2;
+      border-color: #4a90e2;
+      color: white;
+      font-weight: 600;
     }
   </style>
 
@@ -55,18 +93,31 @@
 </head>
 <body>
 
-  <!-- 검색 박스 -->
-  <div id="search-box">
-    <span>기업 검색:</span>
-    <input id="search-input" type="text" placeholder="기업명을 입력하세요" />
-    <button id="search-button">검색</button>
+  <!-- 상단 UI (검색 + 산업 필터) -->
+  <div id="ui-wrapper">
+    <!-- 기업명 검색 -->
+    <div id="search-box">
+      <span>기업 검색:</span>
+      <input id="search-input" type="text" placeholder="기업명을 입력하세요" />
+      <button id="search-button">검색</button>
+    </div>
+
+    <!-- 산업 필터 -->
+    <div id="industry-filter">
+      <button class="industry-btn" data-industry="">전체</button>
+      <button class="industry-btn" data-industry="ship">조선·해양</button>
+      <button class="industry-btn" data-industry="aero">우주·항공</button>
+      <button class="industry-btn" data-industry="craft">공예·공방</button>
+      <button class="industry-btn" data-industry="tradition">전통·예술</button>
+      <button class="industry-btn" data-industry="agri">6차산업</button>
+    </div>
   </div>
 
   <!-- 지도 -->
   <div id="map"></div>
 
   <script>
-    // 1) 우리 기업 데이터
+    // 1) 기업 데이터
     const companies = [
       {
         industry: "aero",
@@ -121,14 +172,18 @@
 
     let map;
     let currentMarkers = [];
-    let baseFiltered = []; // industry로 1차 필터된 데이터
 
-    // 지도 초기화
+    // 상태값: 선택된 산업 & 검색어
+    let currentIndustry = "";   // "", "ship", "aero", ...
+    let currentKeyword = "";    // 기업명 검색어
+
     window.onload = function () {
       kakao.maps.load(function () {
-        // URL 파라미터에서 industry 읽기
         const urlParams = new URLSearchParams(window.location.search);
-        const industry = urlParams.get("industry"); // ship, aero, craft...
+        const industryParam = urlParams.get("industry");
+        if (industryParam) {
+          currentIndustry = industryParam;
+        }
 
         const mapContainer = document.getElementById("map");
         const mapOption = {
@@ -137,28 +192,39 @@
         };
         map = new kakao.maps.Map(mapContainer, mapOption);
 
-        // 1차: industry 기준 필터 (없으면 전체)
-        baseFiltered = industry
-          ? companies.filter(c => c.industry === industry)
-          : companies;
-
-        // 초기 마커 표시
-        renderMarkers(baseFiltered);
-
-        // 검색 이벤트 연결
+        setupIndustryButtons();
         setupSearch();
+
+        // 초기 렌더링
+        renderMarkers(getFilteredData());
       });
     };
 
-    // 마커 다시 그리기 함수
+    // 현재 상태(currentIndustry, currentKeyword)에 따라 데이터 필터링
+    function getFilteredData() {
+      let data = companies;
+
+      if (currentIndustry) {
+        data = data.filter(c => c.industry === currentIndustry);
+      }
+
+      if (currentKeyword) {
+        const kw = currentKeyword.toLowerCase();
+        data = data.filter(c =>
+          c.name.toLowerCase().includes(kw)
+        );
+      }
+
+      return data;
+    }
+
+    // 마커 그리기
     function renderMarkers(data) {
-      // 기존 마커 제거
       currentMarkers.forEach(m => m.marker.setMap(null));
       currentMarkers = [];
 
       if (data.length === 0) return;
 
-      // 새 마커 생성
       data.forEach(company => {
         const position = new kakao.maps.LatLng(company.lat, company.lng);
 
@@ -183,35 +249,48 @@
         currentMarkers.push({ marker, company });
       });
 
-      // 첫 번째 결과를 중심으로 지도를 이동
       const first = data[0];
       map.setCenter(new kakao.maps.LatLng(first.lat, first.lng));
     }
 
-    // 검색 기능 설정
+    // 산업 버튼 세팅
+    function setupIndustryButtons() {
+      const buttons = document.querySelectorAll(".industry-btn");
+
+      buttons.forEach(btn => {
+        const code = btn.getAttribute("data-industry");
+
+        // URL 파라미터로 넘어온 값에 맞춰 초기 active 지정
+        if (code === currentIndustry || (currentIndustry === "" && code === "")) {
+          btn.classList.add("active");
+        }
+
+        btn.addEventListener("click", function () {
+          // active 표시 변경
+          buttons.forEach(b => b.classList.remove("active"));
+          this.classList.add("active");
+
+          // 상태 갱신
+          currentIndustry = code; // ""이면 전체
+
+          // 필터 다시 적용
+          renderMarkers(getFilteredData());
+        });
+      });
+    }
+
+    // 검색 세팅
     function setupSearch() {
       const input = document.getElementById("search-input");
       const button = document.getElementById("search-button");
 
       function doSearch() {
-        const keyword = input.value.trim();
-
-        if (!keyword) {
-          // 검색어 없으면 industry 필터만 적용한 기본 상태로 복원
-          renderMarkers(baseFiltered);
-          return;
-        }
-
-        const result = baseFiltered.filter(c =>
-          c.name.toLowerCase().includes(keyword.toLowerCase())
-        );
-
-        renderMarkers(result);
+        currentKeyword = input.value.trim();
+        renderMarkers(getFilteredData());
       }
 
       button.addEventListener("click", doSearch);
 
-      // 엔터 키로 검색
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           doSearch();
