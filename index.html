@@ -18,7 +18,6 @@
 <body>
 <div id="map"></div>
 
-<!-- 🔹 따옴표가 반드시 닫혀 있어야 합니다! -->
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad"></script>
 
 <script>
@@ -28,4 +27,20 @@
         level: 8
     };
 
-    const map = new kakao
+    const map = new kakao.maps.Map(mapContainer, mapOption);
+
+    // 예: EK중공업 위치 마커
+    const ekMarker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(35.0144, 128.3226),
+        map: map
+    });
+
+    // 예: KAI (사천)
+    const kaiMarker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(35.0763, 128.0845),
+        map: map
+    });
+</script>
+
+</body>
+</html>
