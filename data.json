@@ -1,0 +1,51 @@
+[
+  {
+    "industry": "aero",
+    "industryName": "우주·항공",
+    "name": "KAI(한국항공우주산업)",
+    "lat": 34.9781625980645,
+    "lng": 128.29042206421983
+  },
+  {
+    "industry": "ship",
+    "industryName": "조선·해양",
+    "name": "EK중공업",
+    "lat": 35.011319508463835,
+    "lng": 128.48268869165898
+  },
+  {
+    "industry": "ship",
+    "industryName": "조선·해양",
+    "name": "SK오션플랜트",
+    "lat": 35.05193447409189,
+    "lng": 128.47723012735116
+  },
+  {
+    "industry": "ship",
+    "industryName": "조선·해양",
+    "name": "삼강S&C",
+    "lat": 34.99369305057122,
+    "lng": 128.46167095183077
+  },
+  {
+    "industry": "craft",
+    "industryName": "공예·공방",
+    "name": "엄마손공방",
+    "lat": 34.97596206764501,
+    "lng": 128.31615596063517
+  },
+  {
+    "industry": "tradition",
+    "industryName": "전통·예술",
+    "name": "고성오광대보존회",
+    "lat": 34.973605070659815,
+    "lng": 128.33412518499514
+  },
+  {
+    "industry": "agri",
+    "industryName": "6차산업",
+    "name": "정동목장교육농장",
+    "lat": 35.122873160327366,
+    "lng": 128.26343036412558
+  }
+]
