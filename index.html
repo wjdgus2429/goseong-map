@@ -86,6 +86,114 @@
       color: white;
       font-weight: 600;
     }
+
+    /* --------- 마커 클릭 시 뜨는 팝업(커스텀 오버레이) --------- */
+    .company-overlay {
+      display: flex;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      padding: 6px 8px;
+      gap: 8px;
+      min-width: 210px;
+      max-width: 260px;
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+    .company-overlay img {
+      width: 70px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .company-overlay .co-name {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .company-overlay .co-industry {
+      color: #666;
+      margin-bottom: 2px;
+    }
+    .company-overlay .co-main {
+      margin-bottom: 2px;
+    }
+    .company-overlay .co-meta {
+      color: #777;
+      margin-bottom: 4px;
+    }
+    .company-overlay .co-more {
+      border: none;
+      background: #4a90e2;
+      color: white;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    /* --------- 아래쪽 자세히보기 패널 --------- */
+    #detail-panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 12px 12px;
+      box-sizing: border-box;
+      z-index: 20;
+    }
+    #detail-panel.hidden {
+      display: none;
+    }
+    #detail-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.25);
+      padding: 10px 14px 12px;
+      font-family: sans-serif;
+      font-size: 13px;
+    }
+    #detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    #detail-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    #detail-close {
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #detail-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #detail-links li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    #detail-links span {
+      color: #555;
+    }
+    #detail-links a {
+      color: #4a90e2;
+      text-decoration: underline;
+      font-weight: 600;
+    }
   </style>
 
   <!-- Kakao Map SDK -->
@@ -116,66 +224,158 @@
   <!-- 지도 -->
   <div id="map"></div>
 
+  <!-- 아래쪽 자세히보기 패널 -->
+  <div id="detail-panel" class="hidden">
+    <div id="detail-inner">
+      <div id="detail-header">
+        <div id="detail-title"></div>
+        <button id="detail-close">×</button>
+      </div>
+      <ul id="detail-links">
+        <li id="row-company">
+          <span>기업주소</span>
+          <a id="link-company" href="#" target="_blank">바로가기</a>
+        </li>
+        <li id="row-job">
+          <span>직업정보</span>
+          <a id="link-job" href="#" target="_blank">바로가기</a>
+        </li>
+        <li id="row-cert">
+          <span>자격정보</span>
+          <a id="link-cert" href="#" target="_blank">바로가기</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <script>
     // 1) 기업 데이터
+    //  └ 아래 필드들은 자유롭게 채우면 됩니다.
+    //     - mainWork: "주요업무"
+    //     - size: "기업규모 (대기업/중견/중소 등)"
+    //     - jobCategory: "직업분류"
+    //     - imageUrl: "대표 이미지 전체 URL"
+    //     - companyUrl: "기업주소/홈페이지/지도 링크"
+    //     - jobInfoUrl: "직업정보(커리어넷 등)"
+    //     - certInfoUrl: "자격정보(큐넷 등)"
+
     const companies = [
       {
+        id: "kai",
         industry: "aero",
         industryName: "우주·항공",
         name: "KAI(한국항공우주산업)",
         lat: 34.9781625980645,
-        lng: 128.29042206421983
+        lng: 128.29042206421983,
+        mainWork: "항공기 및 발사체 조제, 관리, 생산, 개발, 연구",
+        size: "국가산업(공기업)",
+        jobCategory: "우주ㆍ항공 관련직",
+        imageUrl: "",
+        companyUrl: "https://www.koreaaero.com/KO/",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/search/intro?text=%ED%95%AD%EA%B3%B5",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&totalQuery=%ED%95%AD%EA%B3%B5&searchSort=weight&pageNum=1&resFlag=off&searchMenu=total&gId=&searchQuery=%ED%95%AD%EA%B3%B5"
       },
       {
+        id: "ek",
         industry: "ship",
         industryName: "조선·해양",
         name: "EK중공업",
         lat: 35.011319508463835,
-        lng: 128.48268869165898
+        lng: 128.48268869165898,
+        mainWork: "해양 플랜트 제작, 조선 사업",
+        size: "중소기업",
+        jobCategory: "해양ㆍ조선 관련직",
+        imageUrl: "",
+        companyUrl: "http://www.ekhi.co.kr/wp/",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/job/list",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&gId=&totalQuery=%EC%A1%B0%EC%84%A0&searchSort=&pageNum=1&sang=0&qryStr=%40where+%7B+SRCH_TITLE%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+or+SRCH_TITLE_BI%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+%7D&searchMenu2=total&searchQuery=%EC%A1%B0%EC%84%A0"
       },
       {
+        id: "sk-ocean",
         industry: "ship",
         industryName: "조선·해양",
         name: "SK오션플랜트",
         lat: 35.05193447409189,
-        lng: 128.47723012735116
+        lng: 128.47723012735116,
+        mainWork: "해양 에너지 관리, 해양 플랜트 하부 제작",
+        size: "대기업",
+        jobCategory: "해양ㆍ조선 관련직",
+        imageUrl: "",
+        companyUrl: "https://www.skoceanplant.com/",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/job/list",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&gId=&totalQuery=%EC%A1%B0%EC%84%A0&searchSort=&pageNum=1&sang=0&qryStr=%40where+%7B+SRCH_TITLE%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+or+SRCH_TITLE_BI%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+%7D&searchMenu2=total&searchQuery=%EC%A1%B0%EC%84%A0"
       },
       {
+        id: "samgang",
         industry: "ship",
         industryName: "조선·해양",
         name: "삼강S&C",
         lat: 34.99369305057122,
-        lng: 128.46167095183077
+        lng: 128.46167095183077,
+        mainWork: "신조선, 해양 플랜트 제작(수입)",
+        size: "중견기업",
+        jobCategory: "해양ㆍ조선 관련직",
+        imageUrl: "",
+        companyUrl: "https://www.sam-kang.com/snc/",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/job/list",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&gId=&totalQuery=%EC%A1%B0%EC%84%A0&searchSort=&pageNum=1&sang=0&qryStr=%40where+%7B+SRCH_TITLE%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+or+SRCH_TITLE_BI%28HASALL%7C%27%ED%95%AD%EA%B3%B5%27%7C1000%7C0%29+%7D&searchMenu2=total&searchQuery=%EC%A1%B0%EC%84%A0"
       },
       {
+        id: "mom-hand",
         industry: "craft",
         industryName: "공예·공방",
         name: "엄마손공방",
         lat: 34.97596206764501,
-        lng: 128.31615596063517
+        lng: 128.31615596063517,
+        mainWork: "공예 수업, 작품 제작",
+        size: "개인사업장",
+        jobCategory: "자개공예, 민화체험",
+        imageUrl: "",
+        companyUrl: "",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/major/uList",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&gId=&totalQuery=%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0%EC%88%98%EB%A6%AC&searchSort=&pageNum=1&sang=0&qryStr=%40where+%7B+SRCH_TITLE%28HASALL%7C%27%EA%B3%B5%EC%98%88%27%7C1000%7C0%29+or+SRCH_TITLE_BI%28HASALL%7C%27%EA%B3%B5%EC%98%88%27%7C1000%7C0%29+%7D&searchMenu2=total&searchQuery=%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0%EC%88%98%EB%A6%AC"
       },
       {
+        id: "ogwangdae",
         industry: "tradition",
         industryName: "전통·예술",
         name: "고성오광대보존회",
         lat: 34.973605070659815,
-        lng: 128.33412518499514
+        lng: 128.33412518499514,
+        mainWork: "문화제전수지도, 공연",
+        size: "국가산업",
+        jobCategory: "민속놀이, 무형문화제",
+        imageUrl: "",
+        companyUrl: "www.ogwangdae.or.kr",
+        jobInfoUrl: "https://www.work.go.kr/consltJobCarpa/srch/expThemeDetail.do?abnJobdptLrclId=D008&abnJobdptSmclId=10011&jobClcd=D",
+        certInfoUrl: "https://www.work.go.kr/consltJobCarpa/srch/expThemeDetail.do?abnJobdptLrclId=D008&abnJobdptSmclId=10011&jobClcd=D"
       },
       {
+        id: "jungdong-farm",
         industry: "agri",
         industryName: "6차산업",
         name: "정동목장교육농장",
         lat: 35.122873160327366,
-        lng: 128.26343036412558
+        lng: 128.26343036412558,
+        mainWork: "농축산업, 유제품제조, 농장체험",
+        size: "개인사업장",
+        jobCategory: "축산업, 유통업, 관광산업",
+        imageUrl: "",
+        companyUrl: "https://www.nongsaro.go.kr/portal/ps/psz/psza/contentSub.ps?menuId=PS03965&cntntsNo=208372",
+        jobInfoUrl: "https://www.career.go.kr/cloud/w/job/view?seq=174",
+        certInfoUrl: "https://www.q-net.or.kr/totalSearch.do?gSite=Q&gId=&totalQuery=%EC%B6%95%EC%82%B0&searchSort=&pageNum=1&sang=0&qryStr=%40where+%7B+SRCH_TITLE%28HASALL%7C%27%EA%B0%80%EC%B6%95%27%7C1000%7C0%29+or+SRCH_TITLE_BI%28HASALL%7C%27%EA%B0%80%EC%B6%95%27%7C1000%7C0%29+%7D&searchMenu2=total&searchQuery=%EC%B6%95%EC%82%B0"
       }
     ];
 
+    // id → company 빠르게 찾기용
+    const companyById = {};
+    companies.forEach(c => { companyById[c.id] = c; });
+
     let map;
     let currentMarkers = [];
-
-    // 상태값: 선택된 산업 & 검색어
-    let currentIndustry = "";   // "", "ship", "aero", ...
-    let currentKeyword = "";    // 기업명 검색어
+    let currentOverlay = null;     // 마커 위 팝업
+    let currentIndustry = "";      // "", "ship", "aero", ...
+    let currentKeyword = "";       // 기업명 검색어
 
     window.onload = function () {
       kakao.maps.load(function () {
@@ -194,6 +394,7 @@
 
         setupIndustryButtons();
         setupSearch();
+        setupDetailPanel();
 
         // 초기 렌더링
         renderMarkers(getFilteredData());
@@ -220,8 +421,16 @@
 
     // 마커 그리기
     function renderMarkers(data) {
+      // 기존 마커 제거
       currentMarkers.forEach(m => m.marker.setMap(null));
       currentMarkers = [];
+
+      // 기존 오버레이/자세히보기 닫기
+      if (currentOverlay) {
+        currentOverlay.setMap(null);
+        currentOverlay = null;
+      }
+      closeDetailPanel();
 
       if (data.length === 0) return;
 
@@ -233,17 +442,8 @@
           map
         });
 
-        const infowindow = new kakao.maps.InfoWindow({
-          content: `
-            <div style="padding:5px 10px; font-size:14px;">
-              <b>${company.name}</b><br/>
-              ${company.industryName}
-            </div>
-          `
-        });
-
         kakao.maps.event.addListener(marker, "click", function () {
-          infowindow.open(map, marker);
+          openCompanyOverlay(company, position);
         });
 
         currentMarkers.push({ marker, company });
@@ -251,6 +451,40 @@
 
       const first = data[0];
       map.setCenter(new kakao.maps.LatLng(first.lat, first.lng));
+    }
+
+    // 마커 클릭 시 뜨는 팝업(커스텀 오버레이)
+    function openCompanyOverlay(company, position) {
+      if (currentOverlay) {
+        currentOverlay.setMap(null);
+      }
+
+      const imgSrc = company.imageUrl && company.imageUrl.trim()
+        ? company.imageUrl
+        : "https://via.placeholder.com/70x60?text=No+Image";
+
+      const mainWorkText = company.mainWork || "";
+      const metaText = [company.size, company.jobCategory].filter(Boolean).join(" / ");
+
+      const content = `
+        <div class="company-overlay">
+          <img src="${imgSrc}" alt="${company.name}" />
+          <div>
+            <div class="co-name">${company.name}</div>
+            <div class="co-industry">${company.industryName}</div>
+            ${mainWorkText ? `<div class="co-main">${mainWorkText}</div>` : ""}
+            ${metaText ? `<div class="co-meta">${metaText}</div>` : ""}
+            <button class="co-more" onclick="openDetailPanel('${company.id}')">자세히보기</button>
+          </div>
+        </div>
+      `;
+
+      currentOverlay = new kakao.maps.CustomOverlay({
+        position,
+        content,
+        yAnchor: 1.2
+      });
+      currentOverlay.setMap(map);
     }
 
     // 산업 버튼 세팅
@@ -297,6 +531,62 @@
         }
       });
     }
+
+    // 아래쪽 자세히보기 패널 세팅
+    function setupDetailPanel() {
+      const closeBtn = document.getElementById("detail-close");
+      closeBtn.addEventListener("click", closeDetailPanel);
+    }
+
+    function openDetailPanel(companyId) {
+      const c = companyById[companyId];
+      if (!c) return;
+
+      const panel = document.getElementById("detail-panel");
+      const titleEl = document.getElementById("detail-title");
+
+      const rowCompany = document.getElementById("row-company");
+      const rowJob = document.getElementById("row-job");
+      const rowCert = document.getElementById("row-cert");
+
+      const linkCompany = document.getElementById("link-company");
+      const linkJob = document.getElementById("link-job");
+      const linkCert = document.getElementById("link-cert");
+
+      titleEl.textContent = c.name;
+
+      // 각 링크가 비어 있으면 해당 줄 숨기기
+      if (c.companyUrl) {
+        rowCompany.style.display = "flex";
+        linkCompany.href = c.companyUrl;
+      } else {
+        rowCompany.style.display = "none";
+      }
+
+      if (c.jobInfoUrl) {
+        rowJob.style.display = "flex";
+        linkJob.href = c.jobInfoUrl;
+      } else {
+        rowJob.style.display = "none";
+      }
+
+      if (c.certInfoUrl) {
+        rowCert.style.display = "flex";
+        linkCert.href = c.certInfoUrl;
+      } else {
+        rowCert.style.display = "none";
+      }
+
+      panel.classList.remove("hidden");
+    }
+
+    function closeDetailPanel() {
+      const panel = document.getElementById("detail-panel");
+      panel.classList.add("hidden");
+    }
+
+    // 커스텀 오버레이의 onclick에서 호출할 수 있도록 전역으로 노출
+    window.openDetailPanel = openDetailPanel;
   </script>
 </body>
 </html>
