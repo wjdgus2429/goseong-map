@@ -249,7 +249,7 @@
   </div>
 
   <script>
-    // 1) 기업 데이터 (실제 내용 다 채워둔 버전)
+    // 1) 기업 데이터
     const companies = [
       {
         id: "kai",
@@ -358,7 +358,7 @@
       }
     ];
 
-    // id → company 맵
+    // id로 빠르게 찾기 위한 맵
     const companyById = {};
     companies.forEach(c => { companyById[c.id] = c; });
 
@@ -476,7 +476,7 @@
             <div class="co-industry">${company.industryName}</div>
             ${mainWorkText ? `<div class="co-main">${mainWorkText}</div>` : ""}
             ${metaText ? `<div class="co-meta">${metaText}</div>` : ""}
-            <button class="co-more" onclick="openDetailPanel('${company.id}')">자세히보기</button>
+            <button class="co-more" onclick="event.stopPropagation(); openDetailPanel('${company.id}')">자세히보기</button>
           </div>
         </div>
       `;
