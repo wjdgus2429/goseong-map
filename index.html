@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="utf-8">
     <title>고성 직업MAP</title>
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
         #map {
             width: 100%;
             height: 100vh;
@@ -13,7 +18,9 @@
 <body>
 <div id="map"></div>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad></script>
+<!-- 🔹 따옴표가 반드시 닫혀 있어야 합니다! -->
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad"></script>
+
 <script>
     const mapContainer = document.getElementById('map');
     const mapOption = {
@@ -21,20 +28,4 @@
         level: 8
     };
 
-    const map = new kakao.maps.Map(mapContainer, mapOption);
-
-    // 예: EK중공업 위치 마커
-    const ekMarker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(35.0144, 128.3226),
-        map: map
-    });
-
-    // 예: KAI (사천)
-    const kaiMarker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(35.0763, 128.0845),
-        map: map
-    });
-</script>
-
-</body>
-</html>
+    const map = new kakao
