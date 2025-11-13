@@ -14,16 +14,59 @@
       width: 100%;
       height: 100vh;
     }
+    /* 검색창 스타일 */
+    #search-box {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+    #search-input {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 8px;
+      min-width: 220px;
+    }
+    #search-button {
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+    }
+    #search-button:hover {
+      background: #3577c5;
+    }
   </style>
 
   <!-- Kakao Map SDK -->
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=3ef40c514a8e54dbb7fdb040363526ad&autoload=false"></script>
 </head>
 <body>
+
+  <!-- 검색 박스 -->
+  <div id="search-box">
+    <span>기업 검색:</span>
+    <input id="search-input" type="text" placeholder="기업명을 입력하세요" />
+    <button id="search-button">검색</button>
+  </div>
+
+  <!-- 지도 -->
   <div id="map"></div>
 
   <script>
-    // 1) 우리 기업 데이터: JSON 대신 JS 배열로 직접 선언
+    // 1) 우리 기업 데이터
     const companies = [
       {
         industry: "aero",
@@ -76,51 +119,105 @@
       }
     ];
 
+    let map;
+    let currentMarkers = [];
+    let baseFiltered = []; // industry로 1차 필터된 데이터
+
+    // 지도 초기화
     window.onload = function () {
       kakao.maps.load(function () {
-        // 2) URL 파라미터에서 industry 값 읽기
+        // URL 파라미터에서 industry 읽기
         const urlParams = new URLSearchParams(window.location.search);
         const industry = urlParams.get("industry"); // ship, aero, craft...
 
-        // 3) 지도 생성
         const mapContainer = document.getElementById("map");
         const mapOption = {
-          center: new kakao.maps.LatLng(34.99, 128.35), // 고성 근처 중심
+          center: new kakao.maps.LatLng(34.99, 128.35),
           level: 10
         };
-        const map = new kakao.maps.Map(mapContainer, mapOption);
+        map = new kakao.maps.Map(mapContainer, mapOption);
 
-        // 4) 산업 필터링 (파라미터 없으면 전체)
-        const filtered = industry
+        // 1차: industry 기준 필터 (없으면 전체)
+        baseFiltered = industry
           ? companies.filter(c => c.industry === industry)
           : companies;
 
-        console.log("industry =", industry, "markers =", filtered.length);
+        // 초기 마커 표시
+        renderMarkers(baseFiltered);
 
-        // 5) 마커 찍기
-        filtered.forEach(company => {
-          const position = new kakao.maps.LatLng(company.lat, company.lng);
-
-          const marker = new kakao.maps.Marker({
-            position,
-            map
-          });
-
-          const infowindow = new kakao.maps.InfoWindow({
-            content: `
-              <div style="padding:5px 10px; font-size:14px;">
-                <b>${company.name}</b><br/>
-                ${company.industryName}
-              </div>
-            `
-          });
-
-          kakao.maps.event.addListener(marker, "click", function () {
-            infowindow.open(map, marker);
-          });
-        });
+        // 검색 이벤트 연결
+        setupSearch();
       });
     };
+
+    // 마커 다시 그리기 함수
+    function renderMarkers(data) {
+      // 기존 마커 제거
+      currentMarkers.forEach(m => m.marker.setMap(null));
+      currentMarkers = [];
+
+      if (data.length === 0) return;
+
+      // 새 마커 생성
+      data.forEach(company => {
+        const position = new kakao.maps.LatLng(company.lat, company.lng);
+
+        const marker = new kakao.maps.Marker({
+          position,
+          map
+        });
+
+        const infowindow = new kakao.maps.InfoWindow({
+          content: `
+            <div style="padding:5px 10px; font-size:14px;">
+              <b>${company.name}</b><br/>
+              ${company.industryName}
+            </div>
+          `
+        });
+
+        kakao.maps.event.addListener(marker, "click", function () {
+          infowindow.open(map, marker);
+        });
+
+        currentMarkers.push({ marker, company });
+      });
+
+      // 첫 번째 결과를 중심으로 지도를 이동
+      const first = data[0];
+      map.setCenter(new kakao.maps.LatLng(first.lat, first.lng));
+    }
+
+    // 검색 기능 설정
+    function setupSearch() {
+      const input = document.getElementById("search-input");
+      const button = document.getElementById("search-button");
+
+      function doSearch() {
+        const keyword = input.value.trim();
+
+        if (!keyword) {
+          // 검색어 없으면 industry 필터만 적용한 기본 상태로 복원
+          renderMarkers(baseFiltered);
+          return;
+        }
+
+        const result = baseFiltered.filter(c =>
+          c.name.toLowerCase().includes(keyword.toLowerCase())
+        );
+
+        renderMarkers(result);
+      }
+
+      button.addEventListener("click", doSearch);
+
+      // 엔터 키로 검색
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          doSearch();
+        }
+      });
+    }
   </script>
 </body>
 </html>
