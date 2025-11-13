@@ -141,7 +141,7 @@
       bottom: 0;
       padding: 0 12px 12px;
       box-sizing: border-box;
-      z-index: 20;
+      z-index: 9999;  /* 지도/오버레이보다 확실히 위에 오도록 크게 설정 */
     }
     #detail-panel.hidden {
       display: none;
@@ -389,14 +389,8 @@
         setupSearch();
         setupDetailPanel();
 
-        // 지도 빈 곳 클릭하면 팝업/자세히보기 닫기
-        kakao.maps.event.addListener(map, "click", function () {
-          if (currentOverlay) {
-            currentOverlay.setMap(null);
-            currentOverlay = null;
-          }
-          closeDetailPanel();
-        });
+        // ⚠️ 지도 클릭 시 닫기 기능은 일단 제거 (문제 원인 후보라서)
+        // 나중에 안정되면 다시 넣는 식으로 하자!
 
         // 초기 렌더링
         renderMarkers(getFilteredData());
@@ -476,7 +470,7 @@
             <div class="co-industry">${company.industryName}</div>
             ${mainWorkText ? `<div class="co-main">${mainWorkText}</div>` : ""}
             ${metaText ? `<div class="co-meta">${metaText}</div>` : ""}
-            <button class="co-more" onclick="event.stopPropagation(); openDetailPanel('${company.id}')">자세히보기</button>
+            <button class="co-more" onclick="openDetailPanel('${company.id}')">자세히보기</button>
           </div>
         </div>
       `;
